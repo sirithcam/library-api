@@ -1,29 +1,39 @@
 class Api::UsersController < ApplicationController
-  before_action :authenticate_user, only: [:show, :update]
+  before_action :authenticate_user, only: [:show, :update, :destroy]
 
   def show
-    if @current_user.id == params[:id].to_i
-      render json: @current_user, status: :ok
+    if @current_user.id == params[:id].to_i || @current_user.admin?
+      @user = User.find(params[:id])
+      render json: @user, status: :ok
     else
       render json: { error: 'Unauthorized' }, status: :unauthorized
     end
   end
 
   def update
-    puts "ugabuga"
     if @current_user.id == params[:id].to_i || @current_user.admin?
-      user = User.find(params[:id])
+      @user = User.find(params[:id])
 
-      if user.update(user_params)
-        render json: user, status: :ok
+      if @user.update(user_params)
+        render json: @user, status: :ok
       else
-        render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+        render json: { errors: @user.errors.full_messages }, status: :unprocessable_entity
       end
     else
       render json: { error: 'Unauthorized' }, status: :unauthorized
     end
   end
 
+  def destroy
+    @user = User.find(params[:id])
+
+    if @user == @current_user || @current_user.admin?
+      @user.destroy
+      render json: { message: 'User account deleted successfully' }, status: :ok
+    else
+      render json: { error: 'Unauthorized' }, status: :unauthorized
+    end
+  end
 
   private
 
