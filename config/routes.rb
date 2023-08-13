@@ -6,6 +6,6 @@ Rails.application.routes.draw do
       passwords: 'api/users/passwords'
     }
 
-    resources :users, only: %i[show update destroy]
+    resources :users, only: %i[show update destroy index]
   end
 end

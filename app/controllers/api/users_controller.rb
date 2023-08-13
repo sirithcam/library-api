@@ -1,5 +1,11 @@
 class Api::UsersController < ApplicationController
-  before_action :authenticate_user, only: [:show, :update, :destroy]
+  before_action :authenticate_user!
+  before_action :authenticate_admin!, only: [:index]
+
+  def index
+    @users = User.order(id: :asc)
+    render json: @users, status: :ok
+  end
 
   def show
     if @current_user.id == params[:id].to_i || @current_user.admin?
@@ -37,7 +43,7 @@ class Api::UsersController < ApplicationController
 
   private
 
-  def authenticate_user
+  def authenticate_user!
     token = request.headers['Authorization']&.split(' ')&.last
     if token
       decoded_payload = AuthService.decode_token(token)
@@ -48,6 +54,12 @@ class Api::UsersController < ApplicationController
       end
     else
       render json: { error: 'Authorization token missing' }, status: :unauthorized
+    end
+  end
+
+  def authenticate_admin!
+    unless @current_user.admin?
+      render json: { error: 'You do not have permission to access this resource' }, status: :forbidden
     end
   end
 
