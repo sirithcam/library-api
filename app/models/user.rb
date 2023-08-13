@@ -6,5 +6,5 @@ class User < ApplicationRecord
   # Custom fields
   validates :firstname, :lastname, presence: true
   validates :email, presence: true, uniqueness: true
-  validates :password, presence: true, confirmation: true
+  validates :password, presence: true, allow_nil: true
 end
