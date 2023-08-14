@@ -14,4 +14,13 @@ class Book < ApplicationRecord
   def set_default_rating
     self.rating ||= 0
   end
+
+  def update_average_rating
+    total_reviews = reviews.count
+    return if total_reviews.zero?
+
+    total_rating = reviews.sum(:rating)
+    self.rating = total_rating.to_f / total_reviews
+    save
+  end
 end
