@@ -12,5 +12,6 @@ Rails.application.routes.draw do
     delete '/users/logout', to: 'users#logout', as: 'logout'
 
     resources :users, only: %i[show update destroy index logout]
+    resources :books, only: %i[create]
   end
 end
