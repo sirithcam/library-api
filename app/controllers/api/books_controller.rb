@@ -5,10 +5,14 @@ class Api::BooksController < ApplicationController
   def create
     @book = Book.new(book_params)
 
-    if @book.save
-      render json: @book, status: :created
+    if book_unique?
+      if @book.save
+        render json: @book, status: :created
+      else
+        render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
+      end
     else
-      render json: { errors: @book.errors.full_messages }, status: :unprocessable_entity
+      render json: { error: 'A book with the same title and author already exists.' }, status: :unprocessable_entity
     end
   end
 
@@ -37,5 +41,10 @@ class Api::BooksController < ApplicationController
     return if @current_user.admin?
 
     render json: { error: 'Unauthorized. Only admins can perform this action.' }, status: :unauthorized
+  end
+
+  def book_unique?
+    existing_book = Book.find_by(title: @book.title, author: @book.author)
+    !existing_book
   end
 end
