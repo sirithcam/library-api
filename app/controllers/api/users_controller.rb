@@ -1,6 +1,6 @@
 class Api::UsersController < ApplicationController
   before_action :authenticate_user!
-  before_action :authenticate_admin!, only: [:index]
+  before_action :authenticate_admin!, only: [:index, :promote]
 
   def index
     @users = User.order(id: :asc)
@@ -41,14 +41,31 @@ class Api::UsersController < ApplicationController
     end
   end
 
+  def promote
+    @user = User.find(params[:id])
+
+    if @user.update(admin: !@user.admin)
+      action = @user.admin ? 'promoted' : 'demoted'
+      render json: { message: "User #{action} successfully" }, status: :ok
+    else
+      render json: { errors: user.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def logout
+    @current_user.update(token: nil)
+    render json: { message: 'Logged out successfully' }, status: :ok
+  end
+
   private
 
   def authenticate_user!
     token = request.headers['Authorization']&.split(' ')&.last
     if token
       decoded_payload = AuthService.decode_token(token)
-      if decoded_payload
-        @current_user = User.find(decoded_payload['user_id'])
+      @user = User.find(decoded_payload['user_id'])
+      if token == @user.token
+        @current_user = @user
       else
         render json: { error: 'Unauthorized' }, status: :unauthorized
       end
