@@ -11,7 +11,9 @@ Rails.application.routes.draw do
 
     delete '/users/logout', to: 'users#logout', as: 'logout'
 
+    get '/books/search', to: 'books#search', as: 'search_books'
+
     resources :users, only: %i[show update destroy index logout]
-    resources :books, only: %i[create]
+    resources :books, only: [:create, :update, :destroy, :show, :index]
   end
 end
