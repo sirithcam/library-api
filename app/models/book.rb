@@ -9,12 +9,6 @@ class Book < ApplicationRecord
 
   before_validation :set_default_rating
 
-  private
-
-  def set_default_rating
-    self.rating ||= 0
-  end
-
   def update_average_rating
     total_reviews = reviews.count
     return if total_reviews.zero?
@@ -22,5 +16,11 @@ class Book < ApplicationRecord
     total_rating = reviews.sum(:rating)
     self.rating = total_rating.to_f / total_reviews
     save
+  end
+
+  private
+
+  def set_default_rating
+    self.rating ||= 0
   end
 end

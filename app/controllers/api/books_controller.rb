@@ -18,7 +18,7 @@ class Api::BooksController < ApplicationController
 
   def show
     @book = Book.find(params[:id])
-    render json: @book, status: :ok
+    render json: @book, include: :reviews, status: :ok
   end
 
   def index
