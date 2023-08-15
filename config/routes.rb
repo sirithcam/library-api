@@ -21,9 +21,9 @@ Rails.application.routes.draw do
     delete '/reviews/:id', to: 'reviews#admin_delete_review', as: 'admin_delete_review'
 
     resources :users, only: %i[show update destroy index logout]
-    resources :books, only: [:create, :update, :destroy, :show, :index] do
+    resources :books, only: %i[create update destroy show index] do
       resources :reviews, only: [:create]
     end
-    resources :purchase_intents, only: [:create]
+    resources :purchase_intents, only: %i[create destroy show index]
   end
 end
