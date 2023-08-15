@@ -1,6 +1,6 @@
 class Api::UsersController < ApplicationController
   before_action :authenticate_user!
-  before_action :authenticate_admin!, only: [:index, :promote]
+  before_action :authorize_admin, only: [:index, :promote]
 
   def index
     @users = User.order(id: :asc)
@@ -58,27 +58,6 @@ class Api::UsersController < ApplicationController
   end
 
   private
-
-  def authenticate_user!
-    token = request.headers['Authorization']&.split(' ')&.last
-    if token
-      decoded_payload = AuthService.decode_token(token)
-      @user = User.find(decoded_payload['user_id'])
-      if token == @user.token
-        @current_user = @user
-      else
-        render json: { error: 'Unauthorized' }, status: :unauthorized
-      end
-    else
-      render json: { error: 'Authorization token missing' }, status: :unauthorized
-    end
-  end
-
-  def authenticate_admin!
-    unless @current_user.admin?
-      render json: { error: 'You do not have permission to access this resource' }, status: :forbidden
-    end
-  end
 
   def user_params
     params.require(:user).permit(:firstname, :lastname, :email)
