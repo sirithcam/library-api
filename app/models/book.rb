@@ -8,6 +8,7 @@
 
 class Book < ApplicationRecord
   has_many :reviews, dependent: :destroy
+  has_many :purchase_intents, dependent: :destroy
 
   validates :title, presence: true
   validates :author, presence: true
@@ -27,8 +28,6 @@ class Book < ApplicationRecord
     self.rating = total_rating.to_f / total_reviews
     save
   end
-
-
 
   private
 

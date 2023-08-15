@@ -13,7 +13,15 @@ class Api::PurchaseIntentsController < ApplicationController
 
   private
 
+  # We can add amount later here
   def purchase_intent_params
-    params.require(:purchase_intent).permit(:book_id, :price, :currency, :payment_method)
+    book = Book.find(params[:purchase_intent][:book_id])
+    {
+      user_id: @current_user.id,
+      book_id: params[:purchase_intent][:book_id],
+      price: book.price,
+      currency: book.currency,
+      payment_method: params[:purchase_intent][:payment_method]
+    }
   end
 end

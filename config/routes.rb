@@ -24,5 +24,6 @@ Rails.application.routes.draw do
     resources :books, only: [:create, :update, :destroy, :show, :index] do
       resources :reviews, only: [:create]
     end
+    resources :purchase_intents, only: [:create]
   end
 end
