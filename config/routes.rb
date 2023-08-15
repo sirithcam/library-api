@@ -11,6 +11,18 @@ Rails.application.routes.draw do
 
     delete '/users/logout', to: 'users#logout', as: 'logout'
 
+    get '/books/search', to: 'books#search', as: 'search_books'
+
+
+    get '/books/:book_id/reviews', to: 'reviews#index', as: 'index'
+    put '/books/:book_id/reviews', to: 'reviews#update', as: 'update'
+    delete '/books/:book_id/reviews', to: 'reviews#delete', as: 'delete'
+
+    delete '/reviews/:id', to: 'reviews#admin_delete_review', as: 'admin_delete_review'
+
     resources :users, only: %i[show update destroy index logout]
+    resources :books, only: [:create, :update, :destroy, :show, :index] do
+      resources :reviews, only: [:create]
+    end
   end
 end
