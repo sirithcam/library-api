@@ -27,6 +27,23 @@ class Api::PurchaseIntentsController < ApplicationController
     end
   end
 
+  def update
+    @purchase_intent = PurchaseIntent.find(params[:id])
+
+    unless user_can_access_purchase_intent?
+      return render json: {
+        error: 'Unauthorized. You do not have permission to perform this action.'
+      }, status: :unauthorized
+    end
+
+    if @purchase_intent.update(purchase_intent_params)
+      render json: @purchase_intent, status: :ok
+    else
+      render json: { errors: @purchase_intent.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+
   def destroy
     @purchase_intent = PurchaseIntent.find(params[:id])
 
@@ -40,6 +57,38 @@ class Api::PurchaseIntentsController < ApplicationController
       head :no_content
     else
       render json: { errors: @purchase_intent.errors.full_messages }, status: :unprocessable_entity
+    end
+  end
+
+  def send_intent
+    purchase_intent = PurchaseIntent.find(params[:id])
+
+    payload = {
+      purchase_intent: {
+        purchase_id: purchase_intent.id,
+        user_id: purchase_intent.user_id,
+        book_id: purchase_intent.book_id,
+        price: purchase_intent.price,
+        currency: purchase_intent.currency,
+        payment_method: purchase_intent.payment_method
+      }
+    }
+
+    response = HTTParty.post('http://localhost:4444/api/purchase_intents', body: payload)
+    response_body = JSON.parse(response.body)
+
+    if response.success?
+      purchase_values = payload[:purchase_intent].merge(token: response_body['token'], status: 'pending')
+      purchase_values.reject! { |key, _value| key == :purchase_id }
+      @purchase = @current_user.purchases.build(purchase_values)
+      if @purchase.save
+        purchase_intent.destroy
+        render json: @purchase, status: :created
+      else
+        render json: { errors: @purchase_intent.errors.full_messages }, status: :unprocessable_entity
+      end
+    else
+      render json: { error: 'Failed to send purchase intent', response: response_body }, status: :unprocessable_entity
     end
   end
 

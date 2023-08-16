@@ -24,6 +24,15 @@ Rails.application.routes.draw do
     resources :books, only: %i[create update destroy show index] do
       resources :reviews, only: [:create]
     end
-    resources :purchase_intents, only: %i[create destroy show index]
+    resources :purchase_intents, only: %i[create destroy show index update] do
+      member do
+        post :send_intent
+      end
+    end
+    resources :purchases, only: [:index] do
+      member do
+        post :process_purchase
+      end
+    end
   end
 end
