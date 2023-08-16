@@ -9,4 +9,6 @@ class User < ApplicationRecord
   validates :password, presence: true, allow_nil: true
 
   has_many :reviews, dependent: :destroy
+  has_many :purchase_intents, dependent: :destroy
+  has_many :purchases, dependent: :destroy
 end
